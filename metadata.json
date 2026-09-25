@@ -1,0 +1,6 @@
+{
+  "name": "Hotel Bridge, Unnao | Official Website",
+  "description": "Discover Hotel Bridge, Unnao for comfortable stays, pure vegetarian dining at Royal Kitchen, and memorable events near Lucknow Bypass with direct WhatsApp booking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Rich metallic gold rim gradient -->
+    <linearGradient id="goldRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8A6321" />
+      <stop offset="25%" stop-color="#E8BE68" />
+      <stop offset="45%" stop-color="#FFF3C7" />
+      <stop offset="70%" stop-color="#BD8C35" />
+      <stop offset="100%" stop-color="#7A5317" />
+    </linearGradient>
+
+    <!-- Metallic fill gradient for HB & Bridge -->
+    <linearGradient id="goldFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FCEAB3" />
+      <stop offset="40%" stop-color="#E4B760" />
+      <stop offset="85%" stop-color="#BA872E" />
+      <stop offset="100%" stop-color="#8C5F18" />
+    </linearGradient>
+
+    <!-- Radial dark background depth -->
+    <radialGradient id="darkBgGrad" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#181B20" />
+      <stop offset="70%" stop-color="#0B0C0E" />
+      <stop offset="100%" stop-color="#040506" />
+    </radialGradient>
+
+    <!-- Subtle inner bevel glow -->
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="85%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#E8BE68" stop-opacity="0.25" />
+    </radialGradient>
+  </defs>
+
+  <!-- Outer Golden Frame Ring -->
+  <circle cx="250" cy="250" r="242" fill="url(#darkBgGrad)" stroke="url(#goldRimGrad)" stroke-width="16" />
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#C5963B" stroke-width="1.8" opacity="0.6" />
+  <circle cx="250" cy="250" r="230" fill="url(#innerGlow)" />
+
+  <!-- 1. BRIDGE ICON -->
+  <g fill="url(#goldFillGrad)" stroke="url(#goldFillGrad)" stroke-linejoin="round" stroke-linecap="round">
+    
+    <!-- Perspective Bridge Road Deck -->
+    <polygon points="238,145 262,145 292,188 208,188" opacity="0.95" />
+    <polygon points="248,145 252,145 256,188 244,188" fill="#181A1F" opacity="0.3" />
+
+    <!-- Main Bridge Towers & Cross Beams -->
+    <!-- Left Tower Column -->
+    <polygon points="234,62 241,62 238,145 231,145" />
+    <!-- Right Tower Column -->
+    <polygon points="259,62 266,62 269,145 262,145" />
+    <!-- Top arch/beam -->
+    <path d="M 233,70 Q 250,65 267,70 L 267,78 Q 250,73 233,78 Z" />
+    <path d="M 233,96 Q 250,91 267,96 L 267,102 Q 250,97 233,102 Z" />
+
+    <!-- Arch opening in center -->
+    <path d="M 238,145 L 238,118 Q 250,110 262,118 L 262,145 Z" fill="#0E1013" />
+
+    <!-- Suspension Cables Left -->
+    <path d="M 235,68 Q 200,120 174,162 L 180,165 Q 204,124 237,73 Z" />
+    <polygon points="174,162 188,162 208,188 190,188" />
+    <!-- Left vertical suspender cables -->
+    <line x1="223" y1="92" x2="223" y2="152" stroke-width="2.5" />
+    <line x1="210" y1="112" x2="210" y2="162" stroke-width="2.5" />
+    <line x1="197" y1="132" x2="197" y2="173" stroke-width="2.5" />
+    <line x1="184" y1="150" x2="184" y2="184" stroke-width="2.5" />
+
+    <!-- Suspension Cables Right -->
+    <path d="M 265,68 Q 300,120 326,162 L 320,165 Q 296,124 263,73 Z" />
+    <polygon points="326,162 312,162 292,188 310,188" />
+    <!-- Right vertical suspender cables -->
+    <line x1="277" y1="92" x2="277" y2="152" stroke-width="2.5" />
+    <line x1="290" y1="112" x2="290" y2="162" stroke-width="2.5" />
+    <line x1="303" y1="132" x2="303" y2="173" stroke-width="2.5" />
+    <line x1="316" y1="150" x2="316" y2="184" stroke-width="2.5" />
+  </g>
+
+  <!-- 2. BOLD HB MONOGRAM -->
+  <g fill="url(#goldFillGrad)" transform="translate(0, 0)">
+    <!-- Letter H -->
+    <path d="M 142,220 L 165,220 L 165,282 L 222,282 L 222,220 L 245,220 L 245,346 L 222,346 L 222,303 L 165,303 L 165,346 L 142,346 Z" />
+    
+    <!-- Letter B -->
+    <path d="M 260,220 L 320,220 C 344,220 361,232 361,252 C 361,265 352,276 339,281 C 356,286 366,298 366,314 C 366,335 348,346 322,346 L 260,346 Z M 283,240 L 283,272 L 316,272 C 328,272 337,266 337,256 C 337,246 328,240 316,240 Z M 283,293 L 283,326 L 319,326 C 332,326 342,320 342,309 C 342,298 332,293 319,293 Z" />
+  </g>
+
+  <!-- 3. HERALDIC FLORAL FLOURISH & DIVIDER -->
+  <g fill="url(#goldFillGrad)" stroke="url(#goldFillGrad)">
+    <!-- Left Accent Line -->
+    <line x1="114" y1="369" x2="222" y2="369" stroke-width="1.8" />
+    <circle cx="114" cy="369" r="1.5" />
+
+    <!-- Right Accent Line -->
+    <line x1="278" y1="369" x2="386" y2="369" stroke-width="1.8" />
+    <circle cx="386" cy="369" r="1.5" />
+
+    <!-- Center Fleur / Leaf Motif -->
+    <!-- Center leaf -->
+    <path d="M 250,356 C 253,363 255,367 250,373 C 245,367 247,363 250,356 Z" />
+    <!-- Left petal -->
+    <path d="M 242,367 C 235,366 232,362 230,358 C 235,363 241,364 246,369 Z" />
+    <!-- Right petal -->
+    <path d="M 258,367 C 265,366 268,362 270,358 C 265,363 259,364 254,369 Z" />
+    <!-- Base knot -->
+    <circle cx="250" cy="371" r="2.2" />
+  </g>
+
+  <!-- 4. HOTEL BRIDGE BRAND TEXT -->
+  <text 
+    x="250" 
+    y="408" 
+    text-anchor="middle" 
+    fill="url(#goldFillGrad)" 
+    font-family="'Plus Jakarta Sans', 'Cinzel', 'Trajan Pro', 'Cormorant Garamond', 'Cinzel Decorative', sans-serif" 
+    font-size="28" 
+    font-weight="700" 
+    letter-spacing="9"
+  >
+    HOTEL BRIDGE
+  </text>
+</svg>

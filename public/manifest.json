@@ -1,0 +1,16 @@
+{
+  "short_name": "Hotel Bridge",
+  "name": "Hotel Bridge, Unnao | Best Hotel & Pure Veg Restaurant",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF8F5",
+  "theme_color": "#FAF8F5",
+  "display": "standalone",
+  "orientation": "portrait"
+}
