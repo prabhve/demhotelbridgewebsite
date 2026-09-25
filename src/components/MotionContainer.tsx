@@ -27,12 +27,12 @@ export const staggerContainerVariants: Variants = {
 };
 
 export const staggerItemVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.55,
+      duration: 0.4,
       ease: CUBIC_EASE,
     },
   },
@@ -112,8 +112,8 @@ interface StaggerContainerProps extends HTMLMotionProps<'div'> {
 }
 
 export const StaggerContainer: React.FC<StaggerContainerProps> = ({
-  staggerDelay = 0.12,
-  initialDelay = 0.05,
+  staggerDelay = 0.08,
+  initialDelay = 0.04,
   className = '',
   children,
   ...props
@@ -121,8 +121,7 @@ export const StaggerContainer: React.FC<StaggerContainerProps> = ({
   return (
     <motion.div
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }}
+      animate="visible"
       variants={{
         hidden: { opacity: 0 },
         visible: {

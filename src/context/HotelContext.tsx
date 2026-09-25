@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { HotelConfig, Room, GalleryMedia } from '../types/hotel';
 import { initialHotelData } from '../data/hotelData';
+import { cleanWhatsAppNumber, buildWhatsAppUrls, safeOpenNewTab, WhatsAppUrls } from '../utils/whatsapp';
 
 interface HotelContextType {
   hotel: HotelConfig;
@@ -9,8 +10,15 @@ interface HotelContextType {
   
   // WhatsApp Action Builders
   getWhatsAppUrl: (type: 'general' | 'room' | 'restaurant' | 'event' | 'contact', params?: Record<string, string>) => string;
+  getWhatsAppWebUrl: (type: 'general' | 'room' | 'restaurant' | 'event' | 'contact', params?: Record<string, string>) => string;
   openWhatsApp: (type: 'general' | 'room' | 'restaurant' | 'event' | 'contact', params?: Record<string, string>) => void;
+  openWhatsAppCustom: (customText: string, title?: string) => void;
   getPhoneCallUrl: () => string;
+  
+  // WhatsApp helper modal
+  isWhatsAppModalOpen: boolean;
+  setIsWhatsAppModalOpen: (open: boolean) => void;
+  whatsAppModalData: WhatsAppUrls | null;
   
   // Modal states
   selectedRoom: Room | null;
@@ -59,6 +67,10 @@ export const HotelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [activePolicyModal, setActivePolicyModal] = useState<'privacy' | 'terms' | 'cancellation' | null>(null);
 
+  // WhatsApp Assistant Modal State
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [whatsAppModalData, setWhatsAppModalData] = useState<WhatsAppUrls | null>(null);
+
   // Sync document title with SEO title
   useEffect(() => {
     if (hotel.name) {
@@ -86,11 +98,10 @@ export const HotelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const getWhatsAppUrl = (
+  const getResolvedMessage = (
     type: 'general' | 'room' | 'restaurant' | 'event' | 'contact',
     params: Record<string, string> = {}
   ): string => {
-    const rawNumber = (hotel.whatsappNumber || '916307951300').replace(/[^0-9]/g, '');
     let template = hotel.whatsappTemplates[type] || hotel.whatsappTemplates.general;
 
     // Replace variable placeholders
@@ -100,24 +111,47 @@ export const HotelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Cleanup unreplaced placeholders if any
     template = template.replace(/\{[a-zA-Z0-9_]+\}/g, '');
+    return template.trim();
+  };
 
-    const encodedText = encodeURIComponent(template.trim());
-    return `https://wa.me/${rawNumber}?text=${encodedText}`;
+  const getWhatsAppUrl = (
+    type: 'general' | 'room' | 'restaurant' | 'event' | 'contact',
+    params: Record<string, string> = {}
+  ): string => {
+    const message = getResolvedMessage(type, params);
+    const urls = buildWhatsAppUrls(hotel.whatsappNumber, message);
+    return urls.apiUrl;
+  };
+
+  const getWhatsAppWebUrl = (
+    type: 'general' | 'room' | 'restaurant' | 'event' | 'contact',
+    params: Record<string, string> = {}
+  ): string => {
+    const message = getResolvedMessage(type, params);
+    const urls = buildWhatsAppUrls(hotel.whatsappNumber, message);
+    return urls.webUrl;
   };
 
   const openWhatsApp = (
     type: 'general' | 'room' | 'restaurant' | 'event' | 'contact',
     params: Record<string, string> = {}
   ) => {
-    const url = getWhatsAppUrl(type, params);
-    try {
-      const opened = window.open(url, '_blank', 'noopener,noreferrer');
-      if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-        window.location.href = url;
-      }
-    } catch {
-      window.location.href = url;
-    }
+    const message = getResolvedMessage(type, params);
+    const urls = buildWhatsAppUrls(hotel.whatsappNumber, message);
+
+    // Save modal data and open modal as assistant/fallback
+    setWhatsAppModalData(urls);
+    setIsWhatsAppModalOpen(true);
+
+    // Attempt to open in a new tab without ever navigating current window/iframe
+    safeOpenNewTab(urls.apiUrl);
+  };
+
+  const openWhatsAppCustom = (customText: string, _title?: string) => {
+    const urls = buildWhatsAppUrls(hotel.whatsappNumber, customText);
+    setWhatsAppModalData(urls);
+    setIsWhatsAppModalOpen(true);
+    safeOpenNewTab(urls.apiUrl);
   };
 
   const getPhoneCallUrl = (): string => {
@@ -132,8 +166,13 @@ export const HotelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateHotel,
         resetHotelData,
         getWhatsAppUrl,
+        getWhatsAppWebUrl,
         openWhatsApp,
+        openWhatsAppCustom,
         getPhoneCallUrl,
+        isWhatsAppModalOpen,
+        setIsWhatsAppModalOpen,
+        whatsAppModalData,
         selectedRoom,
         setSelectedRoom,
         isMenuModalOpen,

@@ -133,59 +133,97 @@ export const Footer: React.FC = () => {
 
         </div>
 
-        {/* Dedicated Signature Row: Designed With love By VYUVIK LABS */}
-        <div className="py-6 border-b border-stone-800/70 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-stone-400">
+        {/* Legal, Copyright & Staff Access Bar */}
+        <div className="py-6 border-t border-stone-800/80 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-stone-400">
+          <div className="flex items-center gap-2 text-center md:text-left">
             <span>© {new Date().getFullYear()} Hotel Bridge, Unnao. All rights reserved.</span>
           </div>
 
-          {/* Unique, Luxury Styled Designer Signature */}
-          <div className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-stone-900/90 via-stone-800/80 to-stone-900/90 border border-[#E5B869]/25 hover:border-[#E5B869]/60 transition-all duration-300 shadow-md">
-            <span className="text-[11px] font-medium text-stone-300 tracking-wide flex items-center gap-1.5">
-              Designed With <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" /> By
-            </span>
-            <span className="font-mono text-xs font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-[#E5B869] via-[#F8E3B6] to-[#E5B869] bg-clip-text text-transparent group-hover:brightness-110 transition-all">
-              VYUVIK LABS
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E5B869] animate-ping" />
-          </div>
-        </div>
-
-        {/* Secondary Policy & Staff Access Bar (Positioned with right-margin on desktop to never collide with floating WhatsApp) */}
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500 sm:pr-44">
-          {/* Legal / Policy Links */}
-          <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center sm:justify-start">
+          {/* Legal / Policy Links & Admin */}
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center md:justify-end text-stone-400 text-xs">
             <button
               onClick={() => setActivePolicyModal('privacy')}
-              className="hover:text-stone-300 transition-colors"
+              className="hover:text-[#E5B869] transition-colors cursor-pointer"
             >
               Privacy Policy
             </button>
             <span className="text-stone-700">•</span>
             <button
               onClick={() => setActivePolicyModal('terms')}
-              className="hover:text-stone-300 transition-colors"
+              className="hover:text-[#E5B869] transition-colors cursor-pointer"
             >
               Terms of Stay
             </button>
             <span className="text-stone-700">•</span>
             <button
               onClick={() => setActivePolicyModal('cancellation')}
-              className="hover:text-stone-300 transition-colors"
+              className="hover:text-[#E5B869] transition-colors cursor-pointer"
             >
               Cancellation Policy
             </button>
-          </div>
-
-          <div>
+            <span className="text-stone-700">•</span>
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="inline-flex items-center gap-1 text-stone-500 hover:text-stone-300 transition-colors text-[11px]"
+              className="inline-flex items-center gap-1 text-stone-500 hover:text-stone-300 transition-colors text-[11px] cursor-pointer"
               title="Hotel Staff Content & Media Manager"
             >
               <Settings className="w-3 h-3" />
               <span>Hotel Admin</span>
             </button>
+          </div>
+        </div>
+
+        {/* Ornate Divider leading to bottom center brand signature */}
+        <div className="w-full flex items-center justify-center gap-3 my-2">
+          <div className="h-px flex-1 max-w-xs bg-gradient-to-r from-transparent via-stone-800 to-[#E5B869]/20" />
+          <div className="w-1.5 h-1.5 rotate-45 border border-[#E5B869]/60 bg-[#E5B869]/30" />
+          <div className="h-px flex-1 max-w-xs bg-gradient-to-l from-transparent via-stone-800 to-[#E5B869]/20" />
+        </div>
+
+        {/* ===================================================================
+            EXCLUSIVE BOTTOM-CENTER BRAND SIGNATURE: VYUVIK LABS
+            Bespoke Luxury Glassmorphic Emblem with Ambient Gold Glow & Shimmer
+           =================================================================== */}
+        <div className="pt-2 pb-8 flex flex-col items-center justify-center text-center">
+          <div className="group relative inline-flex items-center gap-2.5 sm:gap-3 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-b from-[#1C2026] via-[#14171C] to-[#0D0F13] border border-[#E5B869]/35 hover:border-[#E5B869]/80 shadow-[0_4px_24px_rgba(0,0,0,0.6),0_0_15px_rgba(229,184,105,0.08)] hover:shadow-[0_8px_32px_rgba(229,184,105,0.22)] transition-all duration-500 overflow-hidden cursor-default select-none">
+            
+            {/* Ambient gold glow on hover */}
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#E5B869]/0 via-[#E5B869]/15 to-[#E5B869]/0 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none" />
+
+            {/* Shimmer light sweep on hover */}
+            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out pointer-events-none" />
+
+            {/* Monogram Crest for VYUVIK */}
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-[#916B36] via-[#E5B869] to-[#FCEAB3] p-px flex items-center justify-center shadow-xs shrink-0">
+              <div className="w-full h-full rounded-full bg-[#14171C] flex items-center justify-center text-[10px] sm:text-[11px] font-black text-[#E5B869] group-hover:scale-110 transition-transform duration-300">
+                V
+              </div>
+            </div>
+
+            {/* "Designed With Heart By" phrase */}
+            <span className="text-[11px] sm:text-xs font-medium text-stone-300 tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+              <span>Designed With</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse shrink-0 inline-block drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
+              <span>By</span>
+            </span>
+
+            {/* Brand Title: VYUVIK LABS */}
+            <span className="font-mono text-xs sm:text-sm font-black tracking-[0.24em] sm:tracking-[0.28em] uppercase bg-gradient-to-r from-[#F6D285] via-[#FFF5DE] to-[#D19B44] bg-clip-text text-transparent group-hover:brightness-110 group-hover:tracking-[0.3em] transition-all duration-300 drop-shadow-sm whitespace-nowrap">
+              VYUVIK LABS
+            </span>
+
+            {/* Pulsing Active Beacon */}
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5B869] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E5B869]" />
+            </span>
+          </div>
+
+          {/* Unique Prestige Studio Tagline */}
+          <div className="mt-2.5 flex items-center justify-center gap-2 text-[10px] tracking-[0.28em] uppercase text-stone-500 font-medium">
+            <Sparkles className="w-2.5 h-2.5 text-[#E5B869]/70" />
+            <span>Digital Architecture & Creative Design</span>
+            <Sparkles className="w-2.5 h-2.5 text-[#E5B869]/70" />
           </div>
         </div>
 

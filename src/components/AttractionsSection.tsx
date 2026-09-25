@@ -61,6 +61,7 @@ export const AttractionsSection: React.FC = () => {
                 return (
                   <button
                     key={tab.id}
+                    type="button"
                     onClick={() => setActiveCategory(tab.id)}
                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
                       isActive
@@ -110,13 +111,18 @@ export const AttractionsSection: React.FC = () => {
             <p className="text-stone-600 font-medium text-sm">No landmarks found matching "{searchQuery}".</p>
             <button
               onClick={() => { setActiveCategory('all'); setSearchQuery(''); }}
-              className="mt-3 px-4 py-2 rounded-xl bg-[#1E232A] text-white text-xs font-semibold"
+              className="mt-3 px-4 py-2 rounded-xl bg-[#1E232A] text-white text-xs font-semibold cursor-pointer hover:bg-black transition-colors"
             >
               Reset Filters
             </button>
           </div>
         ) : (
-          <StaggerContainer staggerDelay={0.08} initialDelay={0.05} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StaggerContainer
+            key={`${activeCategory}-${searchQuery}`}
+            staggerDelay={0.06}
+            initialDelay={0.02}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {filteredPlaces.map((place) => {
               const mapsUrl = place.googleMapsUrl || `https://www.google.com/maps/dir/?api=1&origin=Hotel+Bridge+595+Pitamber+Nagar-II+Lucknow+Bypass+Unnao&destination=${encodeURIComponent(place.mapQuery || place.name + ' Unnao')}`;
 

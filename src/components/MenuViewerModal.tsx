@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useHotel } from '../context/HotelContext';
-import { X, Search, UtensilsCrossed, Leaf, Sparkles, MessageSquare, Printer } from 'lucide-react';
+import { X, Search, Leaf, Sparkles, MessageSquare, Printer, ExternalLink, ChevronDown, FileText } from 'lucide-react';
+import { openPrintableMenuWindow } from '../utils/menuPrinter';
 
 export const MenuViewerModal: React.FC = () => {
   const { hotel, isMenuModalOpen, setIsMenuModalOpen, openWhatsApp } = useHotel();
   const [selectedCatId, setSelectedCatId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [onlyJain, setOnlyJain] = useState(false);
+  const [showPrintOptions, setShowPrintOptions] = useState(false);
 
   if (!isMenuModalOpen) return null;
 
@@ -24,8 +26,35 @@ export const MenuViewerModal: React.FC = () => {
     return matchesCategory && matchesSearch && matchesJain;
   });
 
-  const handlePrintMenu = () => {
+  const handleDirectPrint = () => {
+    setShowPrintOptions(false);
     window.print();
+  };
+
+  const handleOpenPrintableTab = (onlyCurrentFilter: boolean = false) => {
+    setShowPrintOptions(false);
+    let categoriesToExport = categories;
+    let note = 'Complete Restaurant Menu';
+
+    if (onlyCurrentFilter && (searchQuery.trim() || selectedCatId !== 'all' || onlyJain)) {
+      categoriesToExport = [
+        {
+          id: 'filtered-export',
+          name:
+            selectedCatId !== 'all'
+              ? categories.find(c => c.id === selectedCatId)?.name || 'Selected Items'
+              : 'Filtered Menu Items',
+          description: `${filteredItems.length} item(s) matching current search/filter`,
+          items: filteredItems,
+        },
+      ];
+      note = `Filtered View (${filteredItems.length} items)`;
+    }
+
+    const opened = openPrintableMenuWindow(hotel, categoriesToExport, note);
+    if (!opened) {
+      window.print();
+    }
   };
 
   const handleReserveDining = () => {
@@ -33,13 +62,13 @@ export const MenuViewerModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 md:p-6 animate-fadeIn">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 md:p-6 animate-fadeIn print:hidden">
       <div className="relative w-full max-w-4xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#E6DFD5] overflow-hidden my-auto max-h-[92vh] flex flex-col">
         
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 bg-white border-b border-[#E6DFD5] flex items-center justify-between">
+        <div className="p-4 sm:p-6 bg-white border-b border-[#E6DFD5] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-[#E5B869]/60 shadow-sm">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border border-[#E5B869]/60 shadow-sm">
               <img
                 src="/logo.svg"
                 alt="Hotel Bridge Logo"
@@ -48,7 +77,7 @@ export const MenuViewerModal: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1E232A]">
+                <h3 className="font-serif text-lg sm:text-2xl font-bold text-[#1E232A]">
                   Royal Kitchen Menu
                 </h3>
                 <span className="inline-flex items-center gap-1 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">
@@ -56,24 +85,79 @@ export const MenuViewerModal: React.FC = () => {
                   100% PURE VEG
                 </span>
               </div>
-              <p className="text-xs text-stone-500">
+              <p className="text-[11px] sm:text-xs text-stone-500">
                 Hotel Bridge • North Indian • South Indian • Tandoori • Chinese • Jain
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrintMenu}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 border border-stone-300 rounded-md bg-stone-50"
-              title="Print / Save Menu"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print</span>
-            </button>
+            {/* Print & PDF Menu Button with Dropdown */}
+            <div className="relative">
+              <div className="inline-flex rounded-md shadow-xs">
+                <button
+                  onClick={() => handleOpenPrintableTab(false)}
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 border border-stone-300 rounded-l-md bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer"
+                  title="Open Clean Printable Menu / Save as PDF"
+                >
+                  <Printer className="w-3.5 h-3.5 text-[#916B36]" />
+                  <span>Print / PDF</span>
+                </button>
+                <button
+                  onClick={() => setShowPrintOptions(prev => !prev)}
+                  className="px-1.5 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 border border-l-0 border-stone-300 rounded-r-md bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer"
+                  title="Print Options"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {showPrintOptions && (
+                <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-stone-200 py-1.5 z-50 text-left">
+                  <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                    Menu Print & Download
+                  </div>
+                  <button
+                    onClick={() => handleOpenPrintableTab(false)}
+                    className="w-full px-3 py-2 text-xs text-stone-700 hover:bg-amber-50/60 flex items-center gap-2.5 text-left transition-colors cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-[#916B36] shrink-0" />
+                    <div>
+                      <div className="font-semibold text-stone-800">Open Clean Menu (New Tab)</div>
+                      <div className="text-[10px] text-stone-500">Perfect for Save to PDF or printing</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={handleDirectPrint}
+                    className="w-full px-3 py-2 text-xs text-stone-700 hover:bg-amber-50/60 flex items-center gap-2.5 text-left transition-colors cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-stone-600 shrink-0" />
+                    <div>
+                      <div className="font-semibold text-stone-800">Direct Print (Ctrl + P)</div>
+                      <div className="text-[10px] text-stone-500">Prints instantly using browser printer</div>
+                    </div>
+                  </button>
+
+                  {(searchQuery.trim() || selectedCatId !== 'all' || onlyJain) && (
+                    <button
+                      onClick={() => handleOpenPrintableTab(true)}
+                      className="w-full px-3 py-2 text-xs text-stone-700 hover:bg-amber-50/60 flex items-center gap-2.5 text-left border-t border-stone-100 transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <div>
+                        <div className="font-semibold text-stone-800">Print Filtered Dishes</div>
+                        <div className="text-[10px] text-stone-500">Only {filteredItems.length} filtered items</div>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setIsMenuModalOpen(false)}
-              className="p-2 rounded-full text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+              className="p-1.5 sm:p-2 rounded-full text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer"
               aria-label="Close Menu"
             >
               <X className="w-5 h-5" />
@@ -220,13 +304,24 @@ export const MenuViewerModal: React.FC = () => {
             <span>Taxes & packing charges extra as applicable • Prices are subject to hotel management updates</span>
           </div>
 
-          <button
-            onClick={handleReserveDining}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#128C7E] hover:bg-[#0c6b60] text-white text-xs font-semibold tracking-wider uppercase transition-colors shadow-sm w-full sm:w-auto"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Enquire / Reserve Table on WhatsApp</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+            <button
+              onClick={() => handleOpenPrintableTab(false)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 hover:border-stone-400 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors w-full sm:w-auto cursor-pointer"
+              title="Open Printable Version / Save as PDF"
+            >
+              <Printer className="w-3.5 h-3.5 text-[#916B36]" />
+              <span>Print / PDF Menu</span>
+            </button>
+
+            <button
+              onClick={handleReserveDining}
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#128C7E] hover:bg-[#0c6b60] text-white text-xs font-semibold tracking-wider uppercase transition-colors shadow-sm w-full sm:w-auto cursor-pointer"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Enquire / Reserve Table</span>
+            </button>
+          </div>
         </div>
 
       </div>

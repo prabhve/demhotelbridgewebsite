@@ -5,7 +5,7 @@ import { FadeIn } from './MotionContainer';
 import { motion } from 'motion/react';
 
 export const ContactSection: React.FC = () => {
-  const { hotel, openWhatsApp, getPhoneCallUrl } = useHotel();
+  const { hotel, openWhatsApp, openWhatsAppCustom, getPhoneCallUrl } = useHotel();
   
   const [senderName, setSenderName] = useState('');
   const [inquiryType, setInquiryType] = useState('Room Booking');
@@ -22,17 +22,7 @@ Inquiry: ${inquiryType}
 Contact: ${userPhone || 'N/A'}
 Message: ${message || 'Please share room / event details.'}`;
 
-    const rawNumber = (hotel.whatsappNumber || '916307951300').replace(/[^0-9]/g, '');
-    const url = `https://wa.me/${rawNumber}?text=${encodeURIComponent(customText)}`;
-    
-    try {
-      const opened = window.open(url, '_blank', 'noopener,noreferrer');
-      if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-        window.location.href = url;
-      }
-    } catch {
-      window.location.href = url;
-    }
+    openWhatsAppCustom(customText, 'Website Inquiry');
   };
 
   return (

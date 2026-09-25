@@ -24,6 +24,8 @@ import { Footer } from './components/Footer';
 import { FloatingActions } from './components/FloatingActions';
 import { AdminCMSModal } from './components/AdminCMSModal';
 import { PoliciesModal } from './components/PoliciesModal';
+import { WhatsAppConnectModal } from './components/WhatsAppConnectModal';
+import { PrintableMenu } from './components/PrintableMenu';
 
 export default function App() {
   return (
@@ -91,6 +93,10 @@ export default function App() {
         <GalleryLightbox />
         <AdminCMSModal />
         <PoliciesModal />
+        <WhatsAppConnectModal />
+
+        {/* Dedicated Printable Restaurant Menu (Visible exclusively when printing) */}
+        <PrintableMenu />
       </div>
     </HotelProvider>
   );

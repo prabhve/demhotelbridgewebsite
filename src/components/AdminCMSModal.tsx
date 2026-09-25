@@ -609,10 +609,12 @@ export const AdminCMSModal: React.FC = () => {
                       <label className="block text-xs text-stone-400 mb-1">WhatsApp Mobile Number</label>
                       <input
                         type="text"
+                        placeholder="e.g. 916307951300 or 6307951300"
                         value={formData.whatsappNumber}
                         onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-[#0D1117] rounded-xl border border-stone-700 text-white text-xs"
                       />
+                      <p className="text-[10px] text-stone-500 mt-1">Accepts 10-digit mobile (6307951300) or with country code (+916307951300).</p>
                     </div>
 
                     <div>
