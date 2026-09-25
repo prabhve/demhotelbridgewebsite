@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { HotelProvider } from './context/HotelContext';
 import { SEOHead } from './components/SEOHead';
 import { Header } from './components/Header';
@@ -102,6 +103,7 @@ export default function App() {
         {/* Dedicated Printable Restaurant Menu (Visible exclusively when printing) */}
         <PrintableMenu />
       </div>
+      <Analytics />
     </HotelProvider>
   );
 }
