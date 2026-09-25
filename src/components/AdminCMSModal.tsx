@@ -51,7 +51,12 @@ import {
   RefreshCw,
   Sliders,
   Smartphone,
-  Monitor
+  Monitor,
+  ChevronDown,
+  ChevronUp,
+  ArrowUp,
+  ArrowDown,
+  AlertCircle
 } from 'lucide-react';
 
 type AdminTab =
@@ -94,6 +99,19 @@ export const AdminCMSModal: React.FC = () => {
   const [newGalleryCat, setNewGalleryCat] = useState<GalleryMedia['category']>('hotel');
   const [seoPreviewMode, setSeoPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [copiedJsonLd, setCopiedJsonLd] = useState(false);
+
+  // Restaurant Menu Management State
+  const [selectedMenuCategoryIndex, setSelectedMenuCategoryIndex] = useState<number | 'all'>('all');
+  const [adminMenuSearch, setAdminMenuSearch] = useState('');
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDesc, setNewCategoryDesc] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   if (!isAdminOpen) return null;
 
@@ -144,7 +162,13 @@ export const AdminCMSModal: React.FC = () => {
     { id: 'contact', label: 'Contact & Front Desk', icon: Phone },
     { id: 'whatsapp', label: 'WhatsApp Templates', icon: MessageSquare },
     { id: 'rooms', label: 'Rooms & Suites', icon: BedDouble, count: formData.rooms?.length },
-    { id: 'restaurant', label: 'Royal Kitchen Dining', icon: UtensilsCrossed, count: formData.restaurant?.menuCategories?.reduce((acc, c) => acc + c.items.length, 0) },
+    {
+      id: 'restaurant',
+      label: 'Royal Kitchen Dining',
+      icon: UtensilsCrossed,
+      count: formData.restaurant?.menuCategories?.reduce((acc, c) => acc + c.items.length, 0),
+      badge: `${formData.restaurant?.menuCategories?.length || 0} Cats`,
+    },
     { id: 'events', label: 'Banquets & Events', icon: Calendar, count: formData.events?.length },
     { id: 'gallery', label: 'Photos & Gallery', icon: ImageIcon, count: formData.gallery?.length },
     { id: 'facilities', label: 'Amenities & Features', icon: ShieldCheck, count: formData.facilities?.length },
@@ -1089,177 +1113,444 @@ export const AdminCMSModal: React.FC = () => {
                 </div>
 
                 {/* Menu Categories and Dishes Management */}
-                <div className="bg-[#161B22] p-5 rounded-2xl border border-stone-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#E5B869]">
-                      Menu Categories & Culinary Items
-                    </h3>
+                <div className="bg-[#161B22] p-5 rounded-2xl border border-stone-800 space-y-5">
+                  {/* Top Bar with Stats & Add Category Button */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-800">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#E5B869]">
+                          Menu Categories &amp; Culinary Items
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E5B869]/20 text-[#E5B869]">
+                          {formData.restaurant.menuCategories.length} Categories •{' '}
+                          {formData.restaurant.menuCategories.reduce((acc, c) => acc + c.items.length, 0)} Dishes
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-stone-400 mt-0.5">
+                        Select a category tab to view and manage its dishes, or click Add Category to introduce new cuisine sections.
+                      </p>
+                    </div>
 
-                    <button
-                      onClick={() => {
-                        const newCat: MenuCategory = {
-                          id: `cat-${Date.now()}`,
-                          name: 'New Menu Category',
-                          description: 'Freshly prepared vegetarian delicacies',
-                          items: [
-                            {
-                              id: `item-${Date.now()}`,
-                              name: 'Chef Special Paneer',
-                              category: 'New Menu Category',
-                              price: 260,
-                              description: 'Signature cottage cheese dish in aromatic gravy',
-                              isChefSpecial: true,
-                              isJainAvailable: true,
-                            },
-                          ],
-                        };
-                        setFormData({
-                          ...formData,
-                          restaurant: {
-                            ...formData.restaurant,
-                            menuCategories: [...formData.restaurant.menuCategories, newCat],
-                          },
-                        });
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E5B869] text-stone-950 font-bold text-xs uppercase"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Menu Category</span>
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddCategoryModal(true);
+                          setNewCategoryName('');
+                          setNewCategoryDesc('');
+                        }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E5B869] to-[#C59B4B] hover:brightness-110 text-stone-950 font-bold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer"
+                        title="Add a new menu category"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Menu Category</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Categories Accordion/List */}
-                  <div className="space-y-4">
-                    {formData.restaurant.menuCategories.map((cat, catIdx) => (
-                      <div key={cat.id} className="p-4 rounded-xl bg-[#0D1117] border border-stone-700 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <input
-                            type="text"
-                            value={cat.name}
-                            onChange={(e) => {
-                              const updated = [...formData.restaurant.menuCategories];
-                              updated[catIdx].name = e.target.value;
-                              setFormData({
-                                ...formData,
-                                restaurant: { ...formData.restaurant, menuCategories: updated },
-                              });
-                            }}
-                            className="text-sm font-bold text-[#E5B869] bg-transparent border-b border-transparent focus:border-[#E5B869] focus:outline-none"
-                          />
+                  {/* Filter & Search Bar */}
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                    {/* Category Switcher Tabs */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 custom-scrollbar flex-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMenuCategoryIndex('all')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                          selectedMenuCategoryIndex === 'all'
+                            ? 'bg-[#E5B869] text-stone-950 font-bold shadow-xs'
+                            : 'bg-[#0D1117] text-stone-400 hover:text-white border border-stone-800'
+                        }`}
+                      >
+                        All Categories ({formData.restaurant.menuCategories.length})
+                      </button>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                const updated = [...formData.restaurant.menuCategories];
-                                updated[catIdx].items.push({
-                                  id: `dish-${Date.now()}`,
-                                  name: 'New Pure Veg Dish',
-                                  category: cat.name,
-                                  price: 220,
-                                  isJainAvailable: true,
-                                });
-                                setFormData({
-                                  ...formData,
-                                  restaurant: { ...formData.restaurant, menuCategories: updated },
-                                });
-                              }}
-                              className="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs flex items-center gap-1"
+                      {formData.restaurant.menuCategories.map((cat, idx) => {
+                        const isSelected = selectedMenuCategoryIndex === idx;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setSelectedMenuCategoryIndex(idx)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#E5B869] text-stone-950 font-bold shadow-xs'
+                                : 'bg-[#0D1117] text-stone-400 hover:text-white border border-stone-800'
+                            }`}
+                          >
+                            <span>{cat.name}</span>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                isSelected ? 'bg-stone-950 text-[#E5B869]' : 'bg-stone-800 text-stone-400'
+                              }`}
                             >
-                              <Plus className="w-3 h-3 text-[#E5B869]" />
-                              <span>Add Dish</span>
-                            </button>
+                              {cat.items.length}
+                            </span>
+                          </button>
+                        );
+                      })}
 
-                            {formData.restaurant.menuCategories.length > 1 && (
-                              <button
-                                onClick={() => {
-                                  const updated = formData.restaurant.menuCategories.filter((_, i) => i !== catIdx);
-                                  setFormData({
-                                    ...formData,
-                                    restaurant: { ...formData.restaurant, menuCategories: updated },
-                                  });
-                                }}
-                                className="p-1 text-rose-400 hover:text-rose-300"
-                                title="Delete Category"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddCategoryModal(true);
+                          setNewCategoryName('');
+                          setNewCategoryDesc('');
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-stone-800/80 hover:bg-stone-800 text-[#E5B869] border border-stone-700 hover:border-[#E5B869] transition-colors flex items-center gap-1 whitespace-nowrap cursor-pointer shrink-0"
+                        title="Add Category"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                      </button>
+                    </div>
 
-                        {/* Dishes Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                          {cat.items.map((item, itemIdx) => (
-                            <div
-                              key={item.id}
-                              className="p-2.5 rounded-lg bg-[#161B22] border border-stone-800 flex items-center justify-between gap-2"
-                            >
+                    {/* Quick Search */}
+                    <div className="relative w-full md:w-64 shrink-0">
+                      <Search className="w-3.5 h-3.5 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search dish or category..."
+                        value={adminMenuSearch}
+                        onChange={(e) => setAdminMenuSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 bg-[#0D1117] rounded-xl border border-stone-700 text-xs text-white focus:outline-none focus:border-[#E5B869]"
+                      />
+                      {adminMenuSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setAdminMenuSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Render Categories List */}
+                  <div className="space-y-5">
+                    {formData.restaurant.menuCategories
+                      .map((cat, catIdx) => ({ cat, catIdx }))
+                      .filter(({ cat, catIdx }) => {
+                        // Category tab filter
+                        if (selectedMenuCategoryIndex !== 'all' && selectedMenuCategoryIndex !== catIdx) {
+                          return false;
+                        }
+                        // Search filter
+                        if (!adminMenuSearch.trim()) return true;
+                        const query = adminMenuSearch.toLowerCase().trim();
+                        const matchesCat =
+                          cat.name.toLowerCase().includes(query) ||
+                          (cat.description && cat.description.toLowerCase().includes(query));
+                        const matchesItem = cat.items.some(
+                          (item) =>
+                            item.name.toLowerCase().includes(query) ||
+                            (item.description && item.description.toLowerCase().includes(query))
+                        );
+                        return matchesCat || matchesItem;
+                      })
+                      .map(({ cat, catIdx }) => {
+                        return (
+                          <div
+                            key={cat.id}
+                            className="p-5 rounded-2xl bg-[#0D1117] border border-stone-700/80 space-y-4 shadow-sm"
+                          >
+                            {/* Category Header Controls */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-800">
                               <div className="flex-1 space-y-1">
-                                <input
-                                  type="text"
-                                  value={item.name}
-                                  onChange={(e) => {
-                                    const updated = [...formData.restaurant.menuCategories];
-                                    updated[catIdx].items[itemIdx].name = e.target.value;
-                                    setFormData({
-                                      ...formData,
-                                      restaurant: { ...formData.restaurant, menuCategories: updated },
-                                    });
-                                  }}
-                                  className="w-full bg-transparent text-xs text-white font-medium focus:outline-none"
-                                />
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[11px] text-[#E5B869] font-mono">₹</span>
+                                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">
+                                    Category #{catIdx + 1}
+                                  </span>
                                   <input
-                                    type="number"
-                                    value={item.price}
+                                    type="text"
+                                    value={cat.name}
                                     onChange={(e) => {
                                       const updated = [...formData.restaurant.menuCategories];
-                                      updated[catIdx].items[itemIdx].price = parseInt(e.target.value, 10) || 0;
+                                      const newName = e.target.value;
+                                      updated[catIdx].name = newName;
+                                      updated[catIdx].items = updated[catIdx].items.map((it) => ({
+                                        ...it,
+                                        category: newName,
+                                      }));
                                       setFormData({
                                         ...formData,
                                         restaurant: { ...formData.restaurant, menuCategories: updated },
                                       });
                                     }}
-                                    className="w-16 bg-[#0D1117] px-1.5 py-0.5 rounded text-[11px] text-stone-200 border border-stone-700"
+                                    className="text-base font-bold text-[#E5B869] bg-transparent border-b border-transparent focus:border-[#E5B869] focus:outline-none px-1 py-0.5"
+                                    placeholder="Category Name"
                                   />
-                                  <label className="flex items-center gap-1 text-[10px] text-emerald-400 cursor-pointer">
+                                </div>
+                                <input
+                                  type="text"
+                                  value={cat.description || ''}
+                                  onChange={(e) => {
+                                    const updated = [...formData.restaurant.menuCategories];
+                                    updated[catIdx].description = e.target.value;
+                                    setFormData({
+                                      ...formData,
+                                      restaurant: { ...formData.restaurant, menuCategories: updated },
+                                    });
+                                  }}
+                                  className="w-full text-xs text-stone-400 bg-transparent border-b border-transparent focus:border-stone-600 focus:outline-none px-1"
+                                  placeholder="Add category tagline / description (e.g. Traditional clay-oven starters...)"
+                                />
+                              </div>
+
+                              <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                                {/* Move Category Up */}
+                                <button
+                                  type="button"
+                                  disabled={catIdx === 0}
+                                  onClick={() => {
+                                    if (catIdx > 0) {
+                                      const updated = [...formData.restaurant.menuCategories];
+                                      const temp = updated[catIdx - 1];
+                                      updated[catIdx - 1] = updated[catIdx];
+                                      updated[catIdx] = temp;
+                                      setFormData({
+                                        ...formData,
+                                        restaurant: { ...formData.restaurant, menuCategories: updated },
+                                      });
+                                      if (selectedMenuCategoryIndex === catIdx) {
+                                        setSelectedMenuCategoryIndex(catIdx - 1);
+                                      }
+                                      showToast(`Moved "${cat.name}" up`);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 disabled:opacity-30 disabled:hover:bg-stone-800 cursor-pointer"
+                                  title="Move Category Up"
+                                >
+                                  <ArrowUp className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Move Category Down */}
+                                <button
+                                  type="button"
+                                  disabled={catIdx === formData.restaurant.menuCategories.length - 1}
+                                  onClick={() => {
+                                    if (catIdx < formData.restaurant.menuCategories.length - 1) {
+                                      const updated = [...formData.restaurant.menuCategories];
+                                      const temp = updated[catIdx + 1];
+                                      updated[catIdx + 1] = updated[catIdx];
+                                      updated[catIdx] = temp;
+                                      setFormData({
+                                        ...formData,
+                                        restaurant: { ...formData.restaurant, menuCategories: updated },
+                                      });
+                                      if (selectedMenuCategoryIndex === catIdx) {
+                                        setSelectedMenuCategoryIndex(catIdx + 1);
+                                      }
+                                      showToast(`Moved "${cat.name}" down`);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 disabled:opacity-30 disabled:hover:bg-stone-800 cursor-pointer"
+                                  title="Move Category Down"
+                                >
+                                  <ArrowDown className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Add Dish Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...formData.restaurant.menuCategories];
+                                    const newDish: MenuItem = {
+                                      id: `dish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                                      name: 'New Pure Veg Dish',
+                                      category: cat.name,
+                                      price: 220,
+                                      description: '',
+                                      isJainAvailable: true,
+                                      isChefSpecial: false,
+                                    };
+                                    updated[catIdx].items.push(newDish);
+                                    setFormData({
+                                      ...formData,
+                                      restaurant: { ...formData.restaurant, menuCategories: updated },
+                                    });
+                                    showToast(`Added new dish to "${cat.name}"`);
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors border border-stone-700"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-[#E5B869]" />
+                                  <span>Add Dish</span>
+                                </button>
+
+                                {/* Delete Category Button */}
+                                {formData.restaurant.menuCategories.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (
+                                        window.confirm(
+                                          `Delete category "${cat.name}" and all its ${cat.items.length} dishes?`
+                                        )
+                                      ) {
+                                        const updated = formData.restaurant.menuCategories.filter(
+                                          (_, i) => i !== catIdx
+                                        );
+                                        setFormData({
+                                          ...formData,
+                                          restaurant: { ...formData.restaurant, menuCategories: updated },
+                                        });
+                                        setSelectedMenuCategoryIndex('all');
+                                        showToast(`Deleted category "${cat.name}"`);
+                                      }
+                                    }}
+                                    className="p-1.5 text-stone-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                                    title="Delete Category"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Dishes Grid */}
+                            {cat.items.length === 0 ? (
+                              <div className="py-6 text-center text-xs text-stone-500 bg-[#161B22] rounded-xl border border-dashed border-stone-800">
+                                <span>No dishes in this category yet.</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...formData.restaurant.menuCategories];
+                                    updated[catIdx].items.push({
+                                      id: `dish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                                      name: 'New Pure Veg Dish',
+                                      category: cat.name,
+                                      price: 220,
+                                      isJainAvailable: true,
+                                    });
+                                    setFormData({
+                                      ...formData,
+                                      restaurant: { ...formData.restaurant, menuCategories: updated },
+                                    });
+                                    showToast(`Added first dish to "${cat.name}"`);
+                                  }}
+                                  className="ml-2 text-[#E5B869] font-bold hover:underline cursor-pointer"
+                                >
+                                  + Add First Dish
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                {cat.items.map((item, itemIdx) => (
+                                  <div
+                                    key={item.id}
+                                    className="p-3 rounded-xl bg-[#161B22] border border-stone-800 space-y-2 hover:border-stone-700 transition-colors"
+                                  >
+                                    <div className="flex items-center justify-between gap-2">
+                                      <input
+                                        type="text"
+                                        value={item.name}
+                                        onChange={(e) => {
+                                          const updated = [...formData.restaurant.menuCategories];
+                                          updated[catIdx].items[itemIdx].name = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            restaurant: { ...formData.restaurant, menuCategories: updated },
+                                          });
+                                        }}
+                                        className="w-full bg-transparent text-xs text-white font-semibold focus:outline-none border-b border-transparent focus:border-[#E5B869]"
+                                        placeholder="Dish Name"
+                                      />
+
+                                      <div className="flex items-center gap-1 shrink-0">
+                                        <span className="text-[11px] text-[#E5B869] font-mono font-bold">₹</span>
+                                        <input
+                                          type="number"
+                                          value={item.price}
+                                          onChange={(e) => {
+                                            const updated = [...formData.restaurant.menuCategories];
+                                            updated[catIdx].items[itemIdx].price = parseInt(e.target.value, 10) || 0;
+                                            setFormData({
+                                              ...formData,
+                                              restaurant: { ...formData.restaurant, menuCategories: updated },
+                                            });
+                                          }}
+                                          className="w-16 bg-[#0D1117] px-2 py-1 rounded text-xs text-white border border-stone-700 font-mono text-right"
+                                          placeholder="Price"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const updated = [...formData.restaurant.menuCategories];
+                                            updated[catIdx].items = updated[catIdx].items.filter(
+                                              (_, i) => i !== itemIdx
+                                            );
+                                            setFormData({
+                                              ...formData,
+                                              restaurant: { ...formData.restaurant, menuCategories: updated },
+                                            });
+                                          }}
+                                          className="p-1 text-stone-500 hover:text-rose-400 transition-colors cursor-pointer"
+                                          title="Delete Dish"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Dish Description */}
                                     <input
-                                      type="checkbox"
-                                      checked={item.isJainAvailable || false}
+                                      type="text"
+                                      value={item.description || ''}
                                       onChange={(e) => {
                                         const updated = [...formData.restaurant.menuCategories];
-                                        updated[catIdx].items[itemIdx].isJainAvailable = e.target.checked;
+                                        updated[catIdx].items[itemIdx].description = e.target.value;
                                         setFormData({
                                           ...formData,
                                           restaurant: { ...formData.restaurant, menuCategories: updated },
                                         });
                                       }}
-                                      className="rounded w-3 h-3"
+                                      className="w-full bg-[#0D1117] px-2 py-1 rounded text-[11px] text-stone-300 border border-stone-800 placeholder-stone-600 focus:outline-none focus:border-stone-700"
+                                      placeholder="Short description (ingredients, flavour note...)"
                                     />
-                                    <span>Jain</span>
-                                  </label>
-                                </div>
-                              </div>
 
-                              <button
-                                onClick={() => {
-                                  const updated = [...formData.restaurant.menuCategories];
-                                  updated[catIdx].items = updated[catIdx].items.filter((_, i) => i !== itemIdx);
-                                  setFormData({
-                                    ...formData,
-                                    restaurant: { ...formData.restaurant, menuCategories: updated },
-                                  });
-                                }}
-                                className="p-1 text-stone-500 hover:text-rose-400 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                                    {/* Badges toggles */}
+                                    <div className="flex items-center gap-3 pt-1 text-[10px]">
+                                      <label className="flex items-center gap-1.5 text-emerald-400 cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={item.isJainAvailable || false}
+                                          onChange={(e) => {
+                                            const updated = [...formData.restaurant.menuCategories];
+                                            updated[catIdx].items[itemIdx].isJainAvailable = e.target.checked;
+                                            setFormData({
+                                              ...formData,
+                                              restaurant: { ...formData.restaurant, menuCategories: updated },
+                                            });
+                                          }}
+                                          className="rounded w-3.5 h-3.5 text-emerald-500"
+                                        />
+                                        <span>Jain Available</span>
+                                      </label>
+
+                                      <label className="flex items-center gap-1.5 text-amber-400 cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={item.isChefSpecial || false}
+                                          onChange={(e) => {
+                                            const updated = [...formData.restaurant.menuCategories];
+                                            updated[catIdx].items[itemIdx].isChefSpecial = e.target.checked;
+                                            setFormData({
+                                              ...formData,
+                                              restaurant: { ...formData.restaurant, menuCategories: updated },
+                                            });
+                                          }}
+                                          className="rounded w-3.5 h-3.5 text-amber-500"
+                                        />
+                                        <span>Chef's Special</span>
+                                      </label>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               </div>
@@ -2626,6 +2917,113 @@ export const AdminCMSModal: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Add New Menu Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#161B22] border border-stone-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-stone-800 pb-3">
+              <div className="flex items-center gap-2">
+                <UtensilsCrossed className="w-5 h-5 text-[#E5B869]" />
+                <h3 className="text-base font-bold text-white">Add New Menu Category</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddCategoryModal(false)}
+                className="text-stone-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-stone-300 mb-1">
+                  Category Name <span className="text-[#E5B869]">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mocktails & Cold Drinks, Tandoori Platters..."
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#0D1117] rounded-xl border border-stone-700 text-white text-xs focus:border-[#E5B869] focus:outline-none"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-300 mb-1">
+                  Category Tagline / Description (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Refreshing mocktails, freshly brewed tea, coffee and shakes."
+                  value={newCategoryDesc}
+                  onChange={(e) => setNewCategoryDesc(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#0D1117] rounded-xl border border-stone-700 text-white text-xs focus:border-[#E5B869] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAddCategoryModal(false)}
+                className="py-2.5 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const catName = newCategoryName.trim() || 'New Menu Category';
+                  const catDesc = newCategoryDesc.trim() || 'Fresh vegetarian specialties';
+                  const newCat: MenuCategory = {
+                    id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    name: catName,
+                    description: catDesc,
+                    items: [
+                      {
+                        id: `dish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                        name: `${catName} Special`,
+                        category: catName,
+                        price: 220,
+                        description: 'Signature freshly prepared delicacy',
+                        isChefSpecial: true,
+                        isJainAvailable: true,
+                      },
+                    ],
+                  };
+                  const updated = [...formData.restaurant.menuCategories, newCat];
+                  setFormData({
+                    ...formData,
+                    restaurant: {
+                      ...formData.restaurant,
+                      menuCategories: updated,
+                    },
+                  });
+                  setSelectedMenuCategoryIndex(updated.length - 1);
+                  setShowAddCategoryModal(false);
+                  setNewCategoryName('');
+                  setNewCategoryDesc('');
+                  showToast(`✓ Category "${catName}" created with 1 starter dish!`);
+                }}
+                className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#E5B869] to-[#C59B4B] hover:brightness-110 text-stone-950 font-bold text-xs uppercase shadow-lg cursor-pointer"
+              >
+                Create Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Live Toast Feedback Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-[#161B22] border border-[#E5B869] text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 animate-fadeIn">
+          <CheckCircle className="w-4 h-4 text-[#E5B869] shrink-0" />
+          <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
       )}
 
