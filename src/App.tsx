@@ -26,11 +26,15 @@ import { AdminCMSModal } from './components/AdminCMSModal';
 import { PoliciesModal } from './components/PoliciesModal';
 import { WhatsAppConnectModal } from './components/WhatsAppConnectModal';
 import { PrintableMenu } from './components/PrintableMenu';
+import { ScrollProgressBar } from './components/ScrollProgressBar';
 
 export default function App() {
   return (
     <HotelProvider>
       <SEOHead />
+      {/* Viewport Top Thin Luxury Scroll Progress Bar */}
+      <ScrollProgressBar />
+
       <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#1E232A] font-sans antialiased selection:bg-[#E5D7C5] overflow-x-hidden pb-16 sm:pb-0">
         {/* 1. Header */}
         <Header />
